@@ -23,7 +23,14 @@ pipeline {
         stage('SonarQube Analysis') {
             steps {
                 withSonarQubeEnv('sonar') {
-                    sh "$SCANNER_HOME/bin/sonar-scanner -Dsonar.projectKey=BlueGreen -Dsonar.projectName=BlueGreen"
+                    sh "$SCANNER_HOME/bin/sonar-scanner -Dsonar.projectKey=BlueGreen -Dsonar.projectName=BlueGreen -Dsonar.java.binaries=."
+                }
+            }
+        }
+        stage('SonarQube QualityGate') {
+            steps {
+                script{
+                    waitForQualityGate abortPipeline: false, credentialsId: 'To_sonar'
                 }
             }
         }
