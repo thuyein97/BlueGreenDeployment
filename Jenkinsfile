@@ -12,11 +12,26 @@ pipeline {
         KUBE_NAMESPACE = 'webapps'
         SCANNER_HOME= tool 'sonar_scanner'
     }
-
     stages {
         stage('Git Checkout') {
             steps {
                 git branch: 'main', credentialsId: 'git-cred', url: 'https://github.com/thuyein97/BlueGreenDeployment.git'
+            }
+        }
+        stage('Compile') {
+            steps {
+                sh 'mvn compile'
+            }
+        }
+        stage('test') {
+            steps {
+                sh 'mvn test -DskipTests=true'
+            }
+        }
+                
+        stage('Trivy FS Scan') {
+            steps {
+                sh "trivy fs --format table -o fs.html ."
             }
         }
         
@@ -34,12 +49,19 @@ pipeline {
                 }
             }
         }
-        
-        stage('Trivy FS Scan') {
+        stage('Build application') {
             steps {
-                sh "trivy fs --format table -o fs.html ."
+                sh 'mvn package -DskipTests=true'
             }
         }
+        stage('Publish Artifact to Nexus') {
+            steps {
+                withMaven(globalMavenSettingsConfig: 'My_Global_Settings', jdk: '', maven: 'maven', mavenSettingsConfig: '', traceability: true) {
+                sh 'mvn deploy -DskipTests=true'
+                }
+            }
+        }
+        
         
         stage('Docker build') {
             steps {
