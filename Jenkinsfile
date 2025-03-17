@@ -12,6 +12,9 @@ pipeline {
         KUBE_NAMESPACE = 'webapps'
         SCANNER_HOME= tool 'sonar_scanner'
     }
+    tool {
+        maven 'maven'
+    }
     stages {
         stage('Git Checkout') {
             steps {
