@@ -1,6 +1,8 @@
 pipeline {
     agent any
-    
+    tools {
+        maven 'maven3'
+    }
     parameters {
         choice(name: 'DEPLOY_ENV', choices: ['blue', 'green'], description: 'Choose which environment to deploy: Blue or Green')
         choice(name: 'DOCKER_TAG', choices: ['blue', 'green'], description: 'Choose the Docker image tag for the deployment')
@@ -12,9 +14,7 @@ pipeline {
         KUBE_NAMESPACE = 'webapps'
         SCANNER_HOME= tool 'sonar_scanner'
     }
-    tools {
-        maven 'maven'
-    }
+
     stages {
         stage('Git Checkout') {
             steps {
@@ -95,7 +95,7 @@ pipeline {
         stage('Deploy MySQL Deployment and Service') {
             steps {
                 script {
-                    withKubeConfig(caCertificate: '', clusterName: 'kubernetes', contextName: '', credentialsId: 'k8-token', namespace: 'webapps', restrictKubeConfigAccess: false, serverUrl: 'https://192.168.49.2:8443') {
+                    withKubeConfig(caCertificate: '', clusterName: 'minikube', contextName: '', credentialsId: 'k8-token', namespace: 'webapps', restrictKubeConfigAccess: false, serverUrl: 'https://192.168.49.2:8443') {
                         sh "kubectl apply -f mysql-ds.yml -n ${KUBE_NAMESPACE}"  // Ensure you have the MySQL deployment YAML ready
                     }
                 }
@@ -105,7 +105,7 @@ pipeline {
         stage('Deploy SVC-APP') {
             steps {
                 script {
-                    withKubeConfig(caCertificate: '', clusterName: 'kubernetes', contextName: '', credentialsId: 'k8-token', namespace: 'webapps', restrictKubeConfigAccess: false, serverUrl: 'https://192.168.49.2:8443') {
+                    withKubeConfig(caCertificate: '', clusterName: 'minikube', contextName: '', credentialsId: 'k8-token', namespace: 'webapps', restrictKubeConfigAccess: false, serverUrl: 'https://192.168.49.2:8443') {
                         sh """ if ! kubectl get svc bankapp-service -n ${KUBE_NAMESPACE}; then
                                 kubectl apply -f bankapp-service.yml -n ${KUBE_NAMESPACE}
                               fi
@@ -125,7 +125,7 @@ pipeline {
                         deploymentFile = 'app-deployment-green.yml'
                     }
 
-                    withKubeConfig(caCertificate: '', clusterName: 'kubernetes', contextName: '', credentialsId: 'k8-token', namespace: 'webapps', restrictKubeConfigAccess: false, serverUrl: 'https://192.168.49.2:8443') {
+                    withKubeConfig(caCertificate: '', clusterName: 'minikube', contextName: '', credentialsId: 'k8-token', namespace: 'webapps', restrictKubeConfigAccess: false, serverUrl: 'https://192.168.49.2:8443') {
                         sh "kubectl apply -f ${deploymentFile} -n ${KUBE_NAMESPACE}"
                     }
                 }
@@ -141,7 +141,7 @@ pipeline {
                     def newEnv = params.DEPLOY_ENV
 
                     // Always switch traffic based on DEPLOY_ENV
-                    withKubeConfig(caCertificate: '', clusterName: 'kubernetes', contextName: '', credentialsId: 'k8-token', namespace: 'webapps', restrictKubeConfigAccess: false, serverUrl: 'https://192.168.49.2:8443') {
+                    withKubeConfig(caCertificate: '', clusterName: 'minikube', contextName: '', credentialsId: 'k8-token', namespace: 'webapps', restrictKubeConfigAccess: false, serverUrl: 'https://192.168.49.2:8443') {
                         sh '''
                             kubectl patch service bankapp-service -p "{\\"spec\\": {\\"selector\\": {\\"app\\": \\"bankapp\\", \\"version\\": \\"''' + newEnv + '''\\"}}}" -n ${KUBE_NAMESPACE}
                         '''
@@ -155,7 +155,7 @@ pipeline {
             steps {
                 script {
                     def verifyEnv = params.DEPLOY_ENV
-                    withKubeConfig(caCertificate: '', clusterName: 'kubernetes', contextName: '', credentialsId: 'k8-token', namespace: 'webapps', restrictKubeConfigAccess: false, serverUrl: 'https://192.168.49.2:8443') {
+                    withKubeConfig(caCertificate: '', clusterName: 'minikube', contextName: '', credentialsId: 'k8-token', namespace: 'webapps', restrictKubeConfigAccess: false, serverUrl: 'https://192.168.49.2:8443') {
                         sh """
                         kubectl get pods -l version=${verifyEnv} -n ${KUBE_NAMESPACE}
                         kubectl get svc bankapp-service -n ${KUBE_NAMESPACE}
