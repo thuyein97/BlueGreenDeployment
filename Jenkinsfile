@@ -59,7 +59,7 @@ pipeline {
         }
         stage('Publish Artifact to Nexus') {
             steps {
-                withMaven(globalMavenSettingsConfig: 'My_Global_Settings', jdk: '', maven: 'maven', mavenSettingsConfig: '', traceability: true) {
+                withMaven(globalMavenSettingsConfig: 'My_Global_Settings', jdk: '', maven: 'maven3', mavenSettingsConfig: '', traceability: true) {
                 sh 'mvn deploy -DskipTests=true'
                 }
             }
