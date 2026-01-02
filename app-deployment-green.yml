@@ -14,6 +14,8 @@ spec:
         app: bankapp
         version: green
     spec:
+      imagePullSecrets:          # 👈 HERE (pod spec level)
+      - name: dockerhub-secret 
       containers:
       - name: bankapp
         image: thuyein97/bankapp:green # Adjust the image tag for the green version
@@ -28,8 +30,8 @@ spec:
           value: Test@123
         resources:
           requests:
-            memory: "500Mi"
-            cpu: "500m"
+            memory: "250Mi"
+            cpu: "250m"
           limits:
-            memory: "1000Mi"
-            cpu: "1000m"
+            memory: "250Mi"
+            cpu: "250m"
