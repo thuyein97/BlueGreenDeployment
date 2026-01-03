@@ -23,7 +23,7 @@ metadata:
   name: jenkins-crb
 subjects:
 - kind: ServiceAccount
-  namespace: webapps
+  namespace: default
   name: jenkins
 roleRef:
   kind: ClusterRole
