@@ -101,14 +101,18 @@ pipeline {
         }
         stage('Helm Deploy') {
             steps {
-                sh """
-                helm upgrade --install bankapp-${DEPLOY_ENV} ./helm/bankapp \
-                    --namespace ${KUBE_NAMESPACE} \
-                    --create-namespace \
-                    --set image.repository=${REGISTRY}/${IMAGE_NAME} \
-                    --set image.tag=${TAG} \
-                    --set deployment.color=${DEPLOY_ENV}
-                """
+                script {
+                    withKubeConfig(caCertificate: '', clusterName: 'minikube', contextName: '', credentialsId: 'k8s-secret', namespace: 'webapps', restrictKubeConfigAccess: false, serverUrl: 'https://192.168.49.2:8443') {
+                        sh """
+                        helm upgrade --install bankapp-${DEPLOY_ENV} ./helm/bankapp \
+                            --namespace ${KUBE_NAMESPACE} \
+                            --create-namespace \
+                            --set image.repository=${REGISTRY}/${IMAGE_NAME} \
+                            --set image.tag=${TAG} \
+                            --set deployment.color=${DEPLOY_ENV}
+                        """
+                    }
+                }
             }
         }
     }
