@@ -106,7 +106,6 @@ pipeline {
                         sh """
                         helm upgrade --install bankapp-${DEPLOY_ENV} ./helm/bankapp \
                             --namespace ${KUBE_NAMESPACE} \
-                            --create-namespace \
                             --set image.repository=${REGISTRY}/${IMAGE_NAME} \
                             --set image.tag=${TAG} \
                             --set deployment.color=${DEPLOY_ENV}
