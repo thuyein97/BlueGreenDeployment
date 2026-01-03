@@ -80,6 +80,7 @@ pipeline {
         stage('Build Image') {
             steps {
                 sh 'docker build -t ${REGISTRY}/${IMAGE_NAME}:${TAG} .'
+            }
         }
         
         stage('Trivy Image Scan') {
